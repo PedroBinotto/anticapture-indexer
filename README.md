@@ -1,36 +1,54 @@
 # Anticapture Indexer
 
-A multichain DAO governance indexer built with [Envio HyperIndex](https://docs.envio.dev). Tracks governance tokens, delegations, voting power, on-chain proposals and votes, and DAO health metrics across major DAOs on Ethereum, Optimism, ZKsync, Arbitrum, and Scroll.
+Anticapture DAO Governance Indexer. Built with [Envio HyperIndex](https://docs.envio.dev).
 
 ## Chains
 
-| Chain | ID |
+| Network | Chain ID |
 |---|---|
 | Ethereum Mainnet | 1 |
-| Optimism | 10 |
-| ZKsync | 324 |
 | Arbitrum | 42161 |
+| Optimism | 10 |
 | Scroll | 534352 |
+| ZKsync | 324 |
 
-## DAOs and contracts indexed
+## Contracts
 
-### Governance tokens
-`AaveToken`, `AAave`, `StkAave`, `ARBToken`, `COMPToken`, `ENSToken`, `FLUIDToken`, `GTCToken`, `LilNounsToken`, `NounsToken`, `OPToken`, `ObolToken`, `SCRToken`, `SHUToken`, `UNIToken`, `ZKToken`
+- **`UNIToken`**: `Transfer`, `DelegateChanged`, `DelegateVotesChanged`
+- **`UNIGovernor`**: `VoteCast`, `ProposalCreated`, `ProposalCanceled`, `ProposalExecuted`, `ProposalQueued`
+- **`ENSToken`**: `Transfer`, `DelegateChanged`, `DelegateVotesChanged`
+- **`ENSGovernor`**: `VoteCast`, `ProposalCreated`, `ProposalCanceled`, `ProposalExecuted`, `ProposalQueued`
+- **`ARBToken`**: `Transfer`, `DelegateChanged`, `DelegateVotesChanged`
+- **`OPToken`**: `Transfer`, `DelegateChanged`, `DelegateVotesChanged`
+- **`OPGovernor`**: `VoteCast`, `ProposalCreatedStandard`, `ProposalCreatedWithType`, `ProposalCreatedModuleWithType`, `ProposalCreatedModule`, `ProposalCanceled`, `ProposalExecuted`, `ProposalQueued`
+- **`GTCToken`**: `Transfer`, `DelegateChanged`, `DelegateVotesChanged`
+- **`GTCGovernor`**: `VoteCast`, `ProposalCreated`, `ProposalCanceled`, `ProposalExecuted`, `ProposalQueued`
+- **`NounsToken`**: `Transfer`, `DelegateChanged`, `DelegateVotesChanged`
+- **`NounsGovernor`**: `VoteCast`, `ProposalCreated`, `ProposalCanceled`, `ProposalExecuted`, `ProposalQueued`, `ProposalVetoed`
+- **`NounsAuction`**: `AuctionSettled`
+- **`LilNounsToken`**: `Transfer`, `DelegateChanged`, `DelegateVotesChanged`
+- **`LilNounsGovernor`**: `VoteCast`, `ProposalCreated`, `ProposalCanceled`, `ProposalExecuted`, `ProposalQueued`, `ProposalVetoed`
+- **`SCRToken`**: `Transfer`, `DelegateChanged`, `DelegateVotesChanged`
+- **`SCRGovernor`**: `VoteCast`, `ProposalCreatedStandard`, `ProposalCreatedWithType`, `ProposalCanceled`, `ProposalExecuted`, `ProposalQueued`
+- **`COMPToken`**: `Transfer`, `DelegateChanged`, `DelegateVotesChanged`
+- **`COMPGovernor`**: `VoteCast`, `ProposalCreated`, `ProposalExtended`, `ProposalCanceled`, `ProposalExecuted`, `ProposalQueued`
+- **`ObolToken`**: `Transfer`, `DelegateChanged`, `DelegateVotesChanged`
+- **`ObolGovernor`**: `VoteCast`, `ProposalCreated`, `ProposalCanceled`, `ProposalExecuted`, `ProposalQueued`
+- **`ZKToken`**: `Transfer`, `DelegateChanged`, `DelegateVotesChanged`
+- **`ZKGovernor`**: `VoteCast`, `ProposalCreated`, `ProposalCanceled`, `ProposalExecuted`, `ProposalQueued`
+- **`SHUToken`**: `Transfer`, `DelegateChanged`, `DelegateVotesChanged`
+- **`Azorius`**: `ProposalCreated`, `AzoriusProposalExecuted`
+- **`LinearVotingStrategy`**: `ProposalInitialized`, `Voted`
+- **`FLUIDToken`**: `Transfer`, `DelegateChanged`, `DelegateVotesChanged`
+- **`FLUIDGovernor`**: `VoteCast`, `ProposalCreated`, `ProposalExtended`, `ProposalCanceled`, `ProposalExecuted`, `ProposalQueued`
+- **`AaveToken`**: `Transfer`
+- **`StkAave`**: `Transfer`
+- **`AAave`**: `Transfer`
+- **`AaveV3`**: `DelegateChanged`
 
-### Governors and governance frameworks
-`AaveV3`, `COMPGovernor`, `ENSGovernor`, `FLUIDGovernor`, `GTCGovernor`, `LilNounsGovernor`, `NounsGovernor`, `OPGovernor`, `ObolGovernor`, `SCRGovernor`, `UNIGovernor`, `ZKGovernor`, `Azorius`, `LinearVotingStrategy`, `NounsAuction`
+## Schema entities (14)
 
-## Schema
-
-14 GraphQL entities including:
-
-- `Token`, `Account`, `AccountBalance`, `AccountPower`
-- `Delegation`, `VotingPowerHistory`, `BalanceHistory`, `Transfer`
-- `VotesOnchain`, `ProposalsOnchain`
-- `DaoMetricsDayBucket`: per-DAO daily metrics
-- `Transaction`, `TokenPrice`, `FeedEvent`
-
-Indexed fields are tuned for queries by delegate, by timestamp, by delegated value, by amount, and by event type.
+`Token`, `Account`, `AccountBalance`, `AccountPower`, `VotingPowerHistory`, `BalanceHistory`, `Delegation`, `Transfer`, `VotesOnchain`, `ProposalsOnchain`, `DaoMetricsDayBucket`, `Transaction`, `TokenPrice`, `FeedEvent`
 
 ## Run locally
 
