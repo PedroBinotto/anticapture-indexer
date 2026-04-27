@@ -1,6 +1,6 @@
 # Anticapture Indexer
 
-A multichain DAO governance indexer built with [Envio HyperIndex](https://docs.envio.dev). Tracks governance tokens, delegations, voting power, on-chain proposals and votes, and DAO health metrics across major DAOs on Ethereum, Optimism, zkSync, Arbitrum, and Scroll.
+A multichain DAO governance indexer built with [Envio HyperIndex](https://docs.envio.dev). Tracks governance tokens, delegations, voting power, on-chain proposals and votes, and DAO health metrics across major DAOs on Ethereum, Optimism, ZKsync, Arbitrum, and Scroll.
 
 ## Chains
 
@@ -8,7 +8,7 @@ A multichain DAO governance indexer built with [Envio HyperIndex](https://docs.e
 |---|---|
 | Ethereum Mainnet | 1 |
 | Optimism | 10 |
-| zkSync Era | 324 |
+| ZKsync | 324 |
 | Arbitrum | 42161 |
 | Scroll | 534352 |
 
