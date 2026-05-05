@@ -47,8 +47,10 @@ indexer.onEvent({ contract: "AAave", event: "Transfer" }, async ({ event, contex
   }, aAaveAddr, daoId, aaveAddressSets);
 });
 
-// AaveV3 DelegateChanged (fired for all 3 token addresses)
-indexer.onEvent({ contract: "AaveV3", event: "DelegateChanged" }, async ({ event, context }) => {
+// Aave V3-style DelegateChanged is emitted by each of the 3 token contracts
+// (same address as their Transfer event). V3 indexer requires a unique
+// (chain, address) pair per contract, so we register one handler per token.
+const handleAaveDelegateChanged = async ({ event, context }: any) => {
   const tokenAddress = event.srcAddress as Address;
   await aaveDelegateChanged(context, {
     delegationType: Number(event.params.delegationType),
@@ -56,4 +58,8 @@ indexer.onEvent({ contract: "AaveV3", event: "DelegateChanged" }, async ({ event
     transactionHash: event.transaction.hash as `0x${string}`, timestamp: BigInt(event.block.timestamp),
     logIndex: event.logIndex,
   }, tokenAddress, daoId);
-});
+};
+
+indexer.onEvent({ contract: "AaveToken", event: "DelegateChanged" }, handleAaveDelegateChanged);
+indexer.onEvent({ contract: "StkAave", event: "DelegateChanged" }, handleAaveDelegateChanged);
+indexer.onEvent({ contract: "AAave", event: "DelegateChanged" }, handleAaveDelegateChanged);
