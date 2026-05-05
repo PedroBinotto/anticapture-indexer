@@ -32,5 +32,6 @@ cache
 *.res.js
 *.res.mjs
 generated
+.envio
 .env
 .pnpm-store

@@ -1,5 +1,5 @@
 import { describe, it } from "vitest";
-import { createTestIndexer } from "generated";
+import { createTestIndexer } from "envio";
 import { getAddress } from "viem";
 
 describe("UNI Governor - ProposalCreated at Block 13_129_516", () => {

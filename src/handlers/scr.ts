@@ -1,4 +1,4 @@
-import { SCRToken, SCRGovernor } from "generated";
+import { indexer } from "envio";
 import { getAddress, type Address } from "viem";
 import { DaoIdEnum } from "../lib/enums";
 import { CONTRACT_ADDRESSES, ProposalStatus } from "../lib/constants";
@@ -31,7 +31,7 @@ const ensureToken = async (context: any) => {
   }
 };
 
-SCRToken.Transfer.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "SCRToken", event: "Transfer" }, async ({ event, context }) => {
   await ensureToken(context);
   const { from, to, value } = event.params;
   const timestamp = BigInt(event.block.timestamp);
@@ -51,7 +51,7 @@ SCRToken.Transfer.handler(async ({ event, context }) => {
 });
 
 // SCR has partial delegation with newDelegatees/oldDelegatees arrays
-SCRToken.DelegateChanged.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "SCRToken", event: "DelegateChanged" }, async ({ event, context }) => {
   const { delegator, newDelegatees } = event.params;
   const timestamp = BigInt(event.block.timestamp);
 
@@ -78,11 +78,11 @@ SCRToken.DelegateChanged.handler(async ({ event, context }) => {
   const txTo = event.transaction.to;
   const txFrom = event.transaction.from;
   if (!txTo) return;
-  const delegateeAddresses = newDelegatees.map((d: readonly [`0x${string}`, bigint]) => d[0] as Address);
+  const delegateeAddresses = newDelegatees.map((d) => d[0] as Address);
   await handleTransaction(context, event.transaction.hash, txFrom!, txTo, timestamp, [delegator, ...delegateeAddresses]);
 });
 
-SCRToken.DelegateVotesChanged.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "SCRToken", event: "DelegateVotesChanged" }, async ({ event, context }) => {
   await delegatedVotesChanged(context, daoId, {
     delegate: event.params.delegate, txHash: event.transaction.hash as `0x${string}`,
     newBalance: event.params.newVotes, oldBalance: event.params.previousVotes,
@@ -97,7 +97,7 @@ SCRToken.DelegateVotesChanged.handler(async ({ event, context }) => {
 });
 
 // Governor handlers
-SCRGovernor.VoteCast.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "SCRGovernor", event: "VoteCast" }, async ({ event, context }) => {
   await voteCast(context, daoId, {
     proposalId: event.params.proposalId.toString(), voter: event.params.voter,
     reason: event.params.reason, support: Number(event.params.support),
@@ -106,7 +106,7 @@ SCRGovernor.VoteCast.handler(async ({ event, context }) => {
   });
 });
 
-SCRGovernor.ProposalCreatedStandard.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "SCRGovernor", event: "ProposalCreatedStandard" }, async ({ event, context }) => {
   await proposalCreated(context, daoId, blockTime, {
     proposalId: event.params.proposalId.toString(), proposer: event.params.proposer,
     txHash: event.transaction.hash as `0x${string}`, targets: [...event.params.targets] as `0x${string}`[],
@@ -118,7 +118,7 @@ SCRGovernor.ProposalCreatedStandard.handler(async ({ event, context }) => {
   });
 });
 
-SCRGovernor.ProposalCreatedWithType.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "SCRGovernor", event: "ProposalCreatedWithType" }, async ({ event, context }) => {
   await proposalCreated(context, daoId, blockTime, {
     proposalId: event.params.proposalId.toString(), proposer: event.params.proposer,
     txHash: event.transaction.hash as `0x${string}`, targets: [...event.params.targets] as `0x${string}`[],
@@ -130,14 +130,14 @@ SCRGovernor.ProposalCreatedWithType.handler(async ({ event, context }) => {
   });
 });
 
-SCRGovernor.ProposalCanceled.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "SCRGovernor", event: "ProposalCanceled" }, async ({ event, context }) => {
   await updateProposalStatus(context, event.params.proposalId.toString(), ProposalStatus.CANCELED);
 });
 
-SCRGovernor.ProposalExecuted.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "SCRGovernor", event: "ProposalExecuted" }, async ({ event, context }) => {
   await updateProposalStatus(context, event.params.proposalId.toString(), ProposalStatus.EXECUTED);
 });
 
-SCRGovernor.ProposalQueued.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "SCRGovernor", event: "ProposalQueued" }, async ({ event, context }) => {
   await updateProposalStatus(context, event.params.proposalId.toString(), ProposalStatus.QUEUED);
 });

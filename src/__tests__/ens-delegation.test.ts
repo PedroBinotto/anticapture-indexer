@@ -1,5 +1,5 @@
 import { describe, it } from "vitest";
-import { createTestIndexer } from "generated";
+import { createTestIndexer } from "envio";
 import { getAddress } from "viem";
 
 const ENS_TOKEN = getAddress("0xC18360217D8F7Ab5e7c516566761Ea12Ce7F9D72");

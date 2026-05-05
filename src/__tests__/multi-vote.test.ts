@@ -1,5 +1,5 @@
 import { describe, it } from "vitest";
-import { createTestIndexer } from "generated";
+import { createTestIndexer } from "envio";
 import { getAddress } from "viem";
 
 describe("Multiple VoteCast Events in Same Block - Block 13_798_162", () => {

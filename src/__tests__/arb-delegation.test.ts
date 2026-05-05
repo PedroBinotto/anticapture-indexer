@@ -1,5 +1,5 @@
 import { describe, it } from "vitest";
-import { createTestIndexer } from "generated";
+import { createTestIndexer } from "envio";
 import { getAddress } from "viem";
 
 const ARB_TOKEN = getAddress("0x912CE59144191C1204E64559FE8253a0e49E6548");

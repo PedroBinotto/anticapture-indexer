@@ -1,4 +1,4 @@
-import { LilNounsToken, LilNounsGovernor } from "generated";
+import { indexer } from "envio";
 import { getAddress, type Address } from "viem";
 import { DaoIdEnum } from "../lib/enums";
 import { CONTRACT_ADDRESSES, ProposalStatus } from "../lib/constants";
@@ -31,7 +31,7 @@ const ensureToken = async (context: any) => {
   }
 };
 
-LilNounsToken.Transfer.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "LilNounsToken", event: "Transfer" }, async ({ event, context }) => {
   await ensureToken(context);
   const { from, to } = event.params;
   const value = 1n; // NFT transfer, always 1
@@ -66,7 +66,7 @@ LilNounsToken.Transfer.handler(async ({ event, context }) => {
   await handleTransaction(context, event.transaction.hash, txFrom!, txTo, timestamp, [from, to], { cex: sets.cex, dex: sets.dex, lending: sets.lending, burning: sets.burning });
 });
 
-LilNounsToken.DelegateChanged.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "LilNounsToken", event: "DelegateChanged" }, async ({ event, context }) => {
   await delegateChanged(context, daoId, {
     delegator: event.params.delegator, delegate: event.params.toDelegate,
     tokenId: event.srcAddress as Address, previousDelegate: event.params.fromDelegate,
@@ -80,7 +80,7 @@ LilNounsToken.DelegateChanged.handler(async ({ event, context }) => {
   await handleTransaction(context, event.transaction.hash, txFrom!, txTo, BigInt(event.block.timestamp), [event.params.delegator, event.params.toDelegate]);
 });
 
-LilNounsToken.DelegateVotesChanged.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "LilNounsToken", event: "DelegateVotesChanged" }, async ({ event, context }) => {
   await delegatedVotesChanged(context, daoId, {
     delegate: event.params.delegate, txHash: event.transaction.hash as `0x${string}`,
     newBalance: event.params.newBalance, oldBalance: event.params.previousBalance,
@@ -95,7 +95,7 @@ LilNounsToken.DelegateVotesChanged.handler(async ({ event, context }) => {
 });
 
 // Governor handlers
-LilNounsGovernor.VoteCast.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "LilNounsGovernor", event: "VoteCast" }, async ({ event, context }) => {
   await voteCast(context, daoId, {
     proposalId: event.params.proposalId.toString(), voter: event.params.voter,
     reason: event.params.reason, support: Number(event.params.support),
@@ -104,7 +104,7 @@ LilNounsGovernor.VoteCast.handler(async ({ event, context }) => {
   });
 });
 
-LilNounsGovernor.ProposalCreated.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "LilNounsGovernor", event: "ProposalCreated" }, async ({ event, context }) => {
   await proposalCreated(context, daoId, blockTime, {
     proposalId: event.params.id.toString(), proposer: event.params.proposer,
     txHash: event.transaction.hash as `0x${string}`, targets: [...event.params.targets] as `0x${string}`[],
@@ -116,18 +116,18 @@ LilNounsGovernor.ProposalCreated.handler(async ({ event, context }) => {
   });
 });
 
-LilNounsGovernor.ProposalCanceled.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "LilNounsGovernor", event: "ProposalCanceled" }, async ({ event, context }) => {
   await updateProposalStatus(context, event.params.id.toString(), ProposalStatus.CANCELED);
 });
 
-LilNounsGovernor.ProposalExecuted.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "LilNounsGovernor", event: "ProposalExecuted" }, async ({ event, context }) => {
   await updateProposalStatus(context, event.params.id.toString(), ProposalStatus.EXECUTED);
 });
 
-LilNounsGovernor.ProposalQueued.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "LilNounsGovernor", event: "ProposalQueued" }, async ({ event, context }) => {
   await updateProposalStatus(context, event.params.id.toString(), ProposalStatus.QUEUED);
 });
 
-LilNounsGovernor.ProposalVetoed.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "LilNounsGovernor", event: "ProposalVetoed" }, async ({ event, context }) => {
   await updateProposalStatus(context, event.params.id.toString(), ProposalStatus.VETOED);
 });

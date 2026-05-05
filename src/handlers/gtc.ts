@@ -1,4 +1,4 @@
-import { GTCToken, GTCGovernor } from "generated";
+import { indexer } from "envio";
 import { getAddress, type Address } from "viem";
 import { DaoIdEnum } from "../lib/enums";
 import { CONTRACT_ADDRESSES, ProposalStatus } from "../lib/constants";
@@ -28,7 +28,7 @@ const ensureToken = async (context: any) => {
   }
 };
 
-GTCToken.Transfer.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "GTCToken", event: "Transfer" }, async ({ event, context }) => {
   await ensureToken(context);
   const { from, to, amount: value } = event.params;
   const timestamp = BigInt(event.block.timestamp);
@@ -47,7 +47,7 @@ GTCToken.Transfer.handler(async ({ event, context }) => {
   await handleTransaction(context, event.transaction.hash, txFrom!, txTo, timestamp, [from, to], { cex: sets.cex, dex: sets.dex, lending: sets.lending, burning: sets.burning });
 });
 
-GTCToken.DelegateChanged.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "GTCToken", event: "DelegateChanged" }, async ({ event, context }) => {
   await delegateChanged(context, daoId, {
     delegator: event.params.delegator, delegate: event.params.toDelegate,
     tokenId: event.srcAddress as Address, previousDelegate: event.params.fromDelegate,
@@ -61,7 +61,7 @@ GTCToken.DelegateChanged.handler(async ({ event, context }) => {
   await handleTransaction(context, event.transaction.hash, txFrom!, txTo, BigInt(event.block.timestamp), [event.params.delegator, event.params.toDelegate]);
 });
 
-GTCToken.DelegateVotesChanged.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "GTCToken", event: "DelegateVotesChanged" }, async ({ event, context }) => {
   await delegatedVotesChanged(context, daoId, {
     delegate: event.params.delegate, txHash: event.transaction.hash as `0x${string}`,
     newBalance: event.params.newBalance, oldBalance: event.params.previousBalance,
@@ -76,7 +76,7 @@ GTCToken.DelegateVotesChanged.handler(async ({ event, context }) => {
 });
 
 // Governor handlers
-GTCGovernor.VoteCast.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "GTCGovernor", event: "VoteCast" }, async ({ event, context }) => {
   await voteCast(context, daoId, {
     proposalId: event.params.proposalId.toString(), voter: event.params.voter,
     reason: event.params.reason, support: Number(event.params.support),
@@ -85,7 +85,7 @@ GTCGovernor.VoteCast.handler(async ({ event, context }) => {
   });
 });
 
-GTCGovernor.ProposalCreated.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "GTCGovernor", event: "ProposalCreated" }, async ({ event, context }) => {
   await proposalCreated(context, daoId, blockTime, {
     proposalId: event.params.proposalId.toString(), proposer: event.params.proposer,
     txHash: event.transaction.hash as `0x${string}`, targets: [...event.params.targets] as `0x${string}`[],
@@ -97,14 +97,14 @@ GTCGovernor.ProposalCreated.handler(async ({ event, context }) => {
   });
 });
 
-GTCGovernor.ProposalCanceled.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "GTCGovernor", event: "ProposalCanceled" }, async ({ event, context }) => {
   await updateProposalStatus(context, event.params.proposalId.toString(), ProposalStatus.CANCELED);
 });
 
-GTCGovernor.ProposalExecuted.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "GTCGovernor", event: "ProposalExecuted" }, async ({ event, context }) => {
   await updateProposalStatus(context, event.params.proposalId.toString(), ProposalStatus.EXECUTED);
 });
 
-GTCGovernor.ProposalQueued.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "GTCGovernor", event: "ProposalQueued" }, async ({ event, context }) => {
   await updateProposalStatus(context, event.params.proposalId.toString(), ProposalStatus.QUEUED);
 });

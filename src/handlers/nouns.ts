@@ -1,4 +1,4 @@
-import { NounsToken, NounsGovernor, NounsAuction } from "generated";
+import { indexer } from "envio";
 import { getAddress, type Address } from "viem";
 import { DaoIdEnum } from "../lib/enums";
 import { CONTRACT_ADDRESSES, ProposalStatus } from "../lib/constants";
@@ -31,7 +31,7 @@ const ensureToken = async (context: any) => {
   }
 };
 
-NounsToken.Transfer.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "NounsToken", event: "Transfer" }, async ({ event, context }) => {
   await ensureToken(context);
   const { from, to } = event.params;
   const value = 1n; // NFT transfer, always 1
@@ -66,7 +66,7 @@ NounsToken.Transfer.handler(async ({ event, context }) => {
   await handleTransaction(context, event.transaction.hash, txFrom!, txTo, timestamp, [from, to], { cex: sets.cex, dex: sets.dex, lending: sets.lending, burning: sets.burning });
 });
 
-NounsToken.DelegateChanged.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "NounsToken", event: "DelegateChanged" }, async ({ event, context }) => {
   await delegateChanged(context, daoId, {
     delegator: event.params.delegator, delegate: event.params.toDelegate,
     tokenId: event.srcAddress as Address, previousDelegate: event.params.fromDelegate,
@@ -80,7 +80,7 @@ NounsToken.DelegateChanged.handler(async ({ event, context }) => {
   await handleTransaction(context, event.transaction.hash, txFrom!, txTo, BigInt(event.block.timestamp), [event.params.delegator, event.params.toDelegate]);
 });
 
-NounsToken.DelegateVotesChanged.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "NounsToken", event: "DelegateVotesChanged" }, async ({ event, context }) => {
   await delegatedVotesChanged(context, daoId, {
     delegate: event.params.delegate, txHash: event.transaction.hash as `0x${string}`,
     newBalance: event.params.newBalance, oldBalance: event.params.previousBalance,
@@ -95,7 +95,7 @@ NounsToken.DelegateVotesChanged.handler(async ({ event, context }) => {
 });
 
 // Governor handlers
-NounsGovernor.VoteCast.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "NounsGovernor", event: "VoteCast" }, async ({ event, context }) => {
   await voteCast(context, daoId, {
     proposalId: event.params.proposalId.toString(), voter: event.params.voter,
     reason: event.params.reason, support: Number(event.params.support),
@@ -104,7 +104,7 @@ NounsGovernor.VoteCast.handler(async ({ event, context }) => {
   });
 });
 
-NounsGovernor.ProposalCreated.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "NounsGovernor", event: "ProposalCreated" }, async ({ event, context }) => {
   await proposalCreated(context, daoId, blockTime, {
     proposalId: event.params.id.toString(), proposer: event.params.proposer,
     txHash: event.transaction.hash as `0x${string}`, targets: [...event.params.targets] as `0x${string}`[],
@@ -116,24 +116,24 @@ NounsGovernor.ProposalCreated.handler(async ({ event, context }) => {
   });
 });
 
-NounsGovernor.ProposalCanceled.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "NounsGovernor", event: "ProposalCanceled" }, async ({ event, context }) => {
   await updateProposalStatus(context, event.params.id.toString(), ProposalStatus.CANCELED);
 });
 
-NounsGovernor.ProposalExecuted.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "NounsGovernor", event: "ProposalExecuted" }, async ({ event, context }) => {
   await updateProposalStatus(context, event.params.id.toString(), ProposalStatus.EXECUTED);
 });
 
-NounsGovernor.ProposalQueued.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "NounsGovernor", event: "ProposalQueued" }, async ({ event, context }) => {
   await updateProposalStatus(context, event.params.id.toString(), ProposalStatus.QUEUED);
 });
 
-NounsGovernor.ProposalVetoed.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "NounsGovernor", event: "ProposalVetoed" }, async ({ event, context }) => {
   await updateProposalStatus(context, event.params.id.toString(), ProposalStatus.VETOED);
 });
 
 // Auction handler
-NounsAuction.AuctionSettled.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "NounsAuction", event: "AuctionSettled" }, async ({ event, context }) => {
   const tokenPriceId = `${daoId}-${event.params.nounId.toString()}`;
   context.TokenPrice.set({
     id: tokenPriceId,

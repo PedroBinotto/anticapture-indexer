@@ -1,4 +1,4 @@
-import { COMPToken, COMPGovernor } from "generated";
+import { indexer } from "envio";
 import { getAddress, type Address } from "viem";
 import { DaoIdEnum } from "../lib/enums";
 import { CONTRACT_ADDRESSES, ProposalStatus } from "../lib/constants";
@@ -28,7 +28,7 @@ const ensureToken = async (context: any) => {
   }
 };
 
-COMPToken.Transfer.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "COMPToken", event: "Transfer" }, async ({ event, context }) => {
   await ensureToken(context);
   const { from, to, amount: value } = event.params;
   const timestamp = BigInt(event.block.timestamp);
@@ -47,7 +47,7 @@ COMPToken.Transfer.handler(async ({ event, context }) => {
   await handleTransaction(context, event.transaction.hash, txFrom!, txTo, timestamp, [from, to], { cex: sets.cex, dex: sets.dex, lending: sets.lending, burning: sets.burning });
 });
 
-COMPToken.DelegateChanged.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "COMPToken", event: "DelegateChanged" }, async ({ event, context }) => {
   await delegateChanged(context, daoId, {
     delegator: event.params.delegator, delegate: event.params.toDelegate,
     tokenId: event.srcAddress as Address, previousDelegate: event.params.fromDelegate,
@@ -61,7 +61,7 @@ COMPToken.DelegateChanged.handler(async ({ event, context }) => {
   await handleTransaction(context, event.transaction.hash, txFrom!, txTo, BigInt(event.block.timestamp), [event.params.delegator, event.params.toDelegate]);
 });
 
-COMPToken.DelegateVotesChanged.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "COMPToken", event: "DelegateVotesChanged" }, async ({ event, context }) => {
   await delegatedVotesChanged(context, daoId, {
     delegate: event.params.delegate, txHash: event.transaction.hash as `0x${string}`,
     newBalance: event.params.newBalance, oldBalance: event.params.previousBalance,
@@ -76,7 +76,7 @@ COMPToken.DelegateVotesChanged.handler(async ({ event, context }) => {
 });
 
 // Governor handlers
-COMPGovernor.VoteCast.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "COMPGovernor", event: "VoteCast" }, async ({ event, context }) => {
   await voteCast(context, daoId, {
     proposalId: event.params.proposalId.toString(), voter: event.params.voter,
     reason: event.params.reason, support: Number(event.params.support),
@@ -85,7 +85,7 @@ COMPGovernor.VoteCast.handler(async ({ event, context }) => {
   });
 });
 
-COMPGovernor.ProposalCreated.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "COMPGovernor", event: "ProposalCreated" }, async ({ event, context }) => {
   await proposalCreated(context, daoId, blockTime, {
     proposalId: event.params.proposalId.toString(), proposer: event.params.proposer,
     txHash: event.transaction.hash as `0x${string}`, targets: [...event.params.targets] as `0x${string}`[],
@@ -97,7 +97,7 @@ COMPGovernor.ProposalCreated.handler(async ({ event, context }) => {
   });
 });
 
-COMPGovernor.ProposalExtended.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "COMPGovernor", event: "ProposalExtended" }, async ({ event, context }) => {
   await proposalExtended(
     context,
     event.params.proposalId.toString(),
@@ -109,14 +109,14 @@ COMPGovernor.ProposalExtended.handler(async ({ event, context }) => {
   );
 });
 
-COMPGovernor.ProposalCanceled.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "COMPGovernor", event: "ProposalCanceled" }, async ({ event, context }) => {
   await updateProposalStatus(context, event.params.proposalId.toString(), ProposalStatus.CANCELED);
 });
 
-COMPGovernor.ProposalExecuted.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "COMPGovernor", event: "ProposalExecuted" }, async ({ event, context }) => {
   await updateProposalStatus(context, event.params.proposalId.toString(), ProposalStatus.EXECUTED);
 });
 
-COMPGovernor.ProposalQueued.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "COMPGovernor", event: "ProposalQueued" }, async ({ event, context }) => {
   await updateProposalStatus(context, event.params.proposalId.toString(), ProposalStatus.QUEUED);
 });

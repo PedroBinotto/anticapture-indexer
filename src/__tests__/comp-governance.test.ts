@@ -1,5 +1,5 @@
 import { describe, it } from "vitest";
-import { createTestIndexer } from "generated";
+import { createTestIndexer } from "envio";
 import { getAddress } from "viem";
 
 const COMP_TOKEN = getAddress("0xc00e94Cb662C3520282E6f5717214004A7f26888");

@@ -1,4 +1,4 @@
-import { ENSToken, ENSGovernor } from "generated";
+import { indexer } from "envio";
 import { getAddress, type Address } from "viem";
 import { DaoIdEnum } from "../lib/enums";
 import { CONTRACT_ADDRESSES, ProposalStatus } from "../lib/constants";
@@ -28,7 +28,7 @@ const ensureToken = async (context: any) => {
   }
 };
 
-ENSToken.Transfer.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "ENSToken", event: "Transfer" }, async ({ event, context }) => {
   await ensureToken(context);
   const { from, to, value } = event.params;
   const timestamp = BigInt(event.block.timestamp);
@@ -47,7 +47,7 @@ ENSToken.Transfer.handler(async ({ event, context }) => {
   await handleTransaction(context, event.transaction.hash, txFrom!, txTo, timestamp, [from, to], { cex: sets.cex, dex: sets.dex, lending: sets.lending, burning: sets.burning });
 });
 
-ENSToken.DelegateChanged.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "ENSToken", event: "DelegateChanged" }, async ({ event, context }) => {
   await delegateChanged(context, daoId, {
     delegator: event.params.delegator, delegate: event.params.toDelegate,
     tokenId: event.srcAddress as Address, previousDelegate: event.params.fromDelegate,
@@ -61,7 +61,7 @@ ENSToken.DelegateChanged.handler(async ({ event, context }) => {
   await handleTransaction(context, event.transaction.hash, txFrom!, txTo, BigInt(event.block.timestamp), [event.params.delegator, event.params.toDelegate]);
 });
 
-ENSToken.DelegateVotesChanged.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "ENSToken", event: "DelegateVotesChanged" }, async ({ event, context }) => {
   await delegatedVotesChanged(context, daoId, {
     delegate: event.params.delegate, txHash: event.transaction.hash as `0x${string}`,
     newBalance: event.params.newBalance, oldBalance: event.params.previousBalance,
@@ -75,7 +75,7 @@ ENSToken.DelegateVotesChanged.handler(async ({ event, context }) => {
   await handleTransaction(context, event.transaction.hash, txFrom!, txTo, BigInt(event.block.timestamp), [event.params.delegate]);
 });
 
-ENSGovernor.VoteCast.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "ENSGovernor", event: "VoteCast" }, async ({ event, context }) => {
   await voteCast(context, daoId, {
     proposalId: event.params.proposalId.toString(), voter: event.params.voter,
     reason: event.params.reason, support: Number(event.params.support),
@@ -84,7 +84,7 @@ ENSGovernor.VoteCast.handler(async ({ event, context }) => {
   });
 });
 
-ENSGovernor.ProposalCreated.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "ENSGovernor", event: "ProposalCreated" }, async ({ event, context }) => {
   await proposalCreated(context, daoId, blockTime, {
     proposalId: event.params.proposalId.toString(), proposer: event.params.proposer,
     txHash: event.transaction.hash as `0x${string}`, targets: [...event.params.targets] as `0x${string}`[],
@@ -96,14 +96,14 @@ ENSGovernor.ProposalCreated.handler(async ({ event, context }) => {
   });
 });
 
-ENSGovernor.ProposalCanceled.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "ENSGovernor", event: "ProposalCanceled" }, async ({ event, context }) => {
   await updateProposalStatus(context, event.params.proposalId.toString(), ProposalStatus.CANCELED);
 });
 
-ENSGovernor.ProposalExecuted.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "ENSGovernor", event: "ProposalExecuted" }, async ({ event, context }) => {
   await updateProposalStatus(context, event.params.proposalId.toString(), ProposalStatus.EXECUTED);
 });
 
-ENSGovernor.ProposalQueued.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "ENSGovernor", event: "ProposalQueued" }, async ({ event, context }) => {
   await updateProposalStatus(context, event.params.proposalId.toString(), ProposalStatus.QUEUED);
 });

@@ -1,4 +1,4 @@
-import { ARBToken } from "generated";
+import { indexer } from "envio";
 import { getAddress, type Address } from "viem";
 import { DaoIdEnum } from "../lib/enums";
 import { CONTRACT_ADDRESSES } from "../lib/constants";
@@ -26,7 +26,7 @@ const ensureToken = async (context: any) => {
   }
 };
 
-ARBToken.Transfer.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "ARBToken", event: "Transfer" }, async ({ event, context }) => {
   await ensureToken(context);
   const { from, to, value } = event.params;
   const timestamp = BigInt(event.block.timestamp);
@@ -45,7 +45,7 @@ ARBToken.Transfer.handler(async ({ event, context }) => {
   await handleTransaction(context, event.transaction.hash, txFrom!, txTo, timestamp, [from, to], { cex: sets.cex, dex: sets.dex, lending: sets.lending, burning: sets.burning });
 });
 
-ARBToken.DelegateChanged.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "ARBToken", event: "DelegateChanged" }, async ({ event, context }) => {
   await delegateChanged(context, daoId, {
     delegator: event.params.delegator, delegate: event.params.toDelegate,
     tokenId: event.srcAddress as Address, previousDelegate: event.params.fromDelegate,
@@ -59,7 +59,7 @@ ARBToken.DelegateChanged.handler(async ({ event, context }) => {
   await handleTransaction(context, event.transaction.hash, txFrom!, txTo, BigInt(event.block.timestamp), [event.params.delegator, event.params.toDelegate]);
 });
 
-ARBToken.DelegateVotesChanged.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "ARBToken", event: "DelegateVotesChanged" }, async ({ event, context }) => {
   await delegatedVotesChanged(context, daoId, {
     delegate: event.params.delegate, txHash: event.transaction.hash as `0x${string}`,
     newBalance: event.params.newBalance, oldBalance: event.params.previousBalance,

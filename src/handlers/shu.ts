@@ -1,4 +1,4 @@
-import { SHUToken, Azorius, LinearVotingStrategy } from "generated";
+import { indexer } from "envio";
 import { getAddress, type Address } from "viem";
 import { DaoIdEnum } from "../lib/enums";
 import { CONTRACT_ADDRESSES, ProposalStatus } from "../lib/constants";
@@ -29,7 +29,7 @@ const ensureToken = async (context: any) => {
   }
 };
 
-SHUToken.Transfer.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "SHUToken", event: "Transfer" }, async ({ event, context }) => {
   await ensureToken(context);
   const { from, to, value } = event.params;
   const timestamp = BigInt(event.block.timestamp);
@@ -48,7 +48,7 @@ SHUToken.Transfer.handler(async ({ event, context }) => {
   await handleTransaction(context, event.transaction.hash, txFrom!, txTo, timestamp, [from, to], { cex: sets.cex, dex: sets.dex, lending: sets.lending, burning: sets.burning });
 });
 
-SHUToken.DelegateChanged.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "SHUToken", event: "DelegateChanged" }, async ({ event, context }) => {
   await delegateChanged(context, daoId, {
     delegator: event.params.delegator, delegate: event.params.toDelegate,
     tokenId: event.srcAddress as Address, previousDelegate: event.params.fromDelegate,
@@ -62,7 +62,7 @@ SHUToken.DelegateChanged.handler(async ({ event, context }) => {
   await handleTransaction(context, event.transaction.hash, txFrom!, txTo, BigInt(event.block.timestamp), [event.params.delegator, event.params.toDelegate]);
 });
 
-SHUToken.DelegateVotesChanged.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "SHUToken", event: "DelegateVotesChanged" }, async ({ event, context }) => {
   await delegatedVotesChanged(context, daoId, {
     delegate: event.params.delegate, txHash: event.transaction.hash as `0x${string}`,
     newBalance: event.params.newBalance, oldBalance: event.params.previousBalance,
@@ -78,7 +78,7 @@ SHUToken.DelegateVotesChanged.handler(async ({ event, context }) => {
 
 // LinearVotingStrategy.ProposalInitialized fires BEFORE Azorius.ProposalCreated
 // Upsert a partial proposal row with endBlock/endTimestamp
-LinearVotingStrategy.ProposalInitialized.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "LinearVotingStrategy", event: "ProposalInitialized" }, async ({ event, context }) => {
   const proposalId = event.params.proposalId.toString();
   const votingEndBlock = Number(event.params.votingEndBlock);
   const blockDelta = votingEndBlock - event.block.number;
@@ -118,7 +118,7 @@ LinearVotingStrategy.ProposalInitialized.handler(async ({ event, context }) => {
 });
 
 // LinearVotingStrategy.Voted
-LinearVotingStrategy.Voted.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "LinearVotingStrategy", event: "Voted" }, async ({ event, context }) => {
   await voteCast(context, daoId, {
     proposalId: event.params.proposalId.toString(), voter: event.params.voter,
     reason: "", support: Number(event.params.voteType),
@@ -128,7 +128,7 @@ LinearVotingStrategy.Voted.handler(async ({ event, context }) => {
 });
 
 // Azorius.ProposalCreated - parse metadata JSON for title/description
-Azorius.ProposalCreated.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "Azorius", event: "ProposalCreated" }, async ({ event, context }) => {
   const proposalId = event.params.proposalId.toString();
   const proposer = event.params.proposer;
   const metadata = event.params.metadata;
@@ -228,6 +228,6 @@ Azorius.ProposalCreated.handler(async ({ event, context }) => {
   });
 });
 
-Azorius.AzoriusProposalExecuted.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "Azorius", event: "AzoriusProposalExecuted" }, async ({ event, context }) => {
   await updateProposalStatus(context, event.params.proposalId.toString(), ProposalStatus.EXECUTED);
 });

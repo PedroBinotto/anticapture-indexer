@@ -1,4 +1,4 @@
-import { AaveToken, StkAave, AAave, AaveV3 } from "generated";
+import { indexer } from "envio";
 import { getAddress, type Address } from "viem";
 import { DaoIdEnum } from "../lib/enums";
 import { CONTRACT_ADDRESSES } from "../lib/constants";
@@ -16,7 +16,7 @@ const aaveAddressSets: AaveAddressSets = {
 
 // AAVE Token
 const aaveAddr = getAddress(aaveConfig.aave.address) as Address;
-AaveToken.Transfer.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "AaveToken", event: "Transfer" }, async ({ event, context }) => {
   await aaveSetup(context, aaveAddr, daoId, aaveConfig.aave.decimals);
   await aaveTransfer(context, {
     from: event.params.from, to: event.params.to, value: event.params.value,
@@ -27,7 +27,7 @@ AaveToken.Transfer.handler(async ({ event, context }) => {
 
 // stkAAVE Token
 const stkAaveAddr = getAddress(aaveConfig.stkAAVE.address) as Address;
-StkAave.Transfer.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "StkAave", event: "Transfer" }, async ({ event, context }) => {
   await aaveSetup(context, stkAaveAddr, daoId, aaveConfig.stkAAVE.decimals);
   await aaveTransfer(context, {
     from: event.params.from, to: event.params.to, value: event.params.value,
@@ -38,7 +38,7 @@ StkAave.Transfer.handler(async ({ event, context }) => {
 
 // aAAVE Token
 const aAaveAddr = getAddress(aaveConfig.aAAVE.address) as Address;
-AAave.Transfer.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "AAave", event: "Transfer" }, async ({ event, context }) => {
   await aaveSetup(context, aAaveAddr, daoId, aaveConfig.aAAVE.decimals);
   await aaveTransfer(context, {
     from: event.params.from, to: event.params.to, value: event.params.value,
@@ -48,7 +48,7 @@ AAave.Transfer.handler(async ({ event, context }) => {
 });
 
 // AaveV3 DelegateChanged (fired for all 3 token addresses)
-AaveV3.DelegateChanged.handler(async ({ event, context }) => {
+indexer.onEvent({ contract: "AaveV3", event: "DelegateChanged" }, async ({ event, context }) => {
   const tokenAddress = event.srcAddress as Address;
   await aaveDelegateChanged(context, {
     delegationType: Number(event.params.delegationType),
