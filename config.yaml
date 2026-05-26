@@ -265,6 +265,8 @@ contracts:
 chains:
   # === Ethereum Mainnet ===
   - id: 1
+    rpc_config:
+      url: http://localhost:8545
     start_block: 0
     contracts:
       # ENS
